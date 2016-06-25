@@ -71,10 +71,24 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		@SuppressWarnings("unchecked")
 		Comparable<? super K> k = (Comparable<? super K>) target;
 		
-		// the actual search
-        // TODO: Fill this in.
-        return null;
+		return findNodeHelper(root, k);
+
 	}
+	private Node findNodeHelper(Node root, Comparable<? super K> target){
+                if (root == null){
+                        return null; 
+                }
+                else if (target.compareTo(root.key) == 0){
+                        return root; 
+                } 
+                if (target.compareTo(root.key) > 0){
+                        return findNodeHelper(root.right, target); 
+                }
+                else{
+                        return findNodeHelper(root.left, target); 
+                }
+        }
+
 
 	/**
 	 * Compares two keys or two values, handling null correctly.
@@ -92,7 +106,19 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	@Override
 	public boolean containsValue(Object target) {
-		return false;
+		return preOrder(target, root); 
+	}
+	private Boolean preOrder(Object target, Node root){
+		if (root == null){
+			return false; 
+		}
+		else if (equals(target, root.value)){
+			return true; 
+		}
+		
+		Boolean left = preOrder(target, root.left); 
+		Boolean right = preOrder(target, root.right); 
+		return (left || right);
 	}
 
 	@Override
@@ -117,8 +143,15 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	@Override
 	public Set<K> keySet() {
 		Set<K> set = new LinkedHashSet<K>();
-        // TODO: Fill this in.
+        	inOrder(set, root); 
 		return set;
+	}
+	private void inOrder(Set<K> set, Node root){
+		if (root == null)
+			return;
+		inOrder(set, root.left); 
+		set.add(root.key); 
+		inOrder(set, root.right); 
 	}
 
 	@Override
@@ -135,8 +168,32 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	}
 
 	private V putHelper(Node node, K key, V value) {
-        // TODO: Fill this in.
-        return null;
+		Comparable<? super K> target = (Comparable<? super K>) node.key; 
+		int decision = target.compareTo(key);
+		if (node.right == null && decision < 0){
+			node.right = new Node(key, value);
+			size++; 
+			return null; 
+
+		}
+		else if (node.left == null && decision > 0){
+			node.left = new Node(key, value);
+			size++; 
+			return null; 
+		}
+        	
+        	if (decision == 0){
+        		V old_val = node.value; 
+        		node.value = value; 
+        		return old_val; 
+		}
+		// go right, val key greater than node
+		else if (decision < 0) {
+			return putHelper(node.right, key, value);
+		}
+		else {
+			return putHelper(node.left, key, value);
+		}
 	}
 
 	@Override
